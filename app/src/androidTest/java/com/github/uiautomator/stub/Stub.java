@@ -35,6 +35,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.Until;
 
@@ -50,7 +51,9 @@ import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -68,8 +71,25 @@ public class Stub {
     int PORT = 9008;
     AutomatorHttpServer server = new AutomatorHttpServer(PORT);
 
+    private void reducePollingInterval(Field field) throws Exception {
+        // Allow modification on the field
+        field.setAccessible(true);
+        Field modifiersField = Field.class.getDeclaredField("accessFlags");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+        // change value
+        field.setLong(null, 5L);
+    }
+
     @Before
     public void setUp() throws Exception {
+        // ============= Daniel add START =============
+        reducePollingInterval(UiObject.class.getDeclaredField("WAIT_FOR_SELECTOR_POLL"));
+        reducePollingInterval(Class.forName("androidx.test.uiautomator.WaitMixin")
+                .getDeclaredField("DEFAULT_POLL_INTERVAL"));
+        // ============= Daniel add END =============
+
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         device.wakeUp();
 

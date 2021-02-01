@@ -76,10 +76,10 @@ public class AutomatorServiceImpl implements AutomatorService {
 
     Handler handler = new Handler(Looper.getMainLooper());
 
-    private UiDevice device;
+    protected UiDevice device;
     private UiAutomation uiAutomation;
     private Instrumentation mInstrumentation;
-    private TouchController touchController;
+    protected TouchController touchController;
     ClipboardManager clipboard;
 
     public AutomatorServiceImpl() {
