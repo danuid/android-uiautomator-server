@@ -1,6 +1,9 @@
 package com.github.uiautomator.stub;
 
 import android.os.SystemClock;
+import android.view.InputDevice;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject;
@@ -27,7 +30,7 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
         long start = SystemClock.uptimeMillis();
         BySelector bySelector = target.toBySelector();
         UiObject2 targetObj = device.findObject(bySelector);
-        if (waitExist) {
+        if (waitExist && targetObj == null) {
             BySelector skipSelector = null;
             if (skipIfExist != null) {
                 // 检查是否要skip的selector
@@ -61,8 +64,31 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
         android.graphics.Rect rect = targetObj.getVisibleBounds();
         int x = (rect.left + rect.right) / 2;
         int y = (rect.top + rect.bottom) / 2;
-        touchController.touchDown(x, y);
-        return touchController.touchUp(x, y);
+        return injectClickEvent(x, y);
+//        touchController.touchDown(x, y);
+//        return touchController.touchUp(x, y);
+    }
+
+    private boolean injectClickEvent(float x, float y) {
+        //A MotionEvent is a type of InputEvent.
+        //The event time must be the current uptime.
+        final long eventTime = SystemClock.uptimeMillis();
+
+        //A typical click event triggered by a user click on the touchscreen creates two MotionEvents,
+        //first one with the action KeyEvent.ACTION_DOWN and the 2nd with the action KeyEvent.ACTION_UP
+        MotionEvent motionDown = MotionEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_DOWN,
+                x, y, 0);
+        //We must set the source of the MotionEvent or the click doesn't work.
+        motionDown.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        uiAutomation.injectInputEvent(motionDown, true);
+        MotionEvent motionUp = MotionEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_UP,
+                x, y, 0);
+        motionUp.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        boolean result = uiAutomation.injectInputEvent(motionUp, true);
+        //Recycle our events back to the system pool.
+        motionUp.recycle();
+        motionDown.recycle();
+        return result;
     }
 
     @Override
@@ -86,8 +112,9 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
         android.graphics.Rect rect = targetObj.getVisibleBounds();
         int x = (rect.left + rect.right) / 2;
         int y = (rect.top + rect.bottom) / 2;
-        touchController.touchDown(x, y);
-        return touchController.touchUp(x, y);
+        return injectClickEvent(x, y);
+//        touchController.touchDown(x, y);
+//        return touchController.touchUp(x, y);
     }
 
 }

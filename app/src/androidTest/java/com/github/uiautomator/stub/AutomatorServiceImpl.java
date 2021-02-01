@@ -77,7 +77,7 @@ public class AutomatorServiceImpl implements AutomatorService {
     Handler handler = new Handler(Looper.getMainLooper());
 
     protected UiDevice device;
-    private UiAutomation uiAutomation;
+    protected UiAutomation uiAutomation;
     private Instrumentation mInstrumentation;
     protected TouchController touchController;
     ClipboardManager clipboard;
