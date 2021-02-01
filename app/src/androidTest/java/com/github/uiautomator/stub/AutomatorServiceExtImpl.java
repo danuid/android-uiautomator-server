@@ -51,23 +51,23 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
         }
 
         // 等待目标enabled状态
-        while (!targetObj.isEnabled() || !targetObj.isClickable()) {
+        while (!targetObj.isEnabled()) {
             if (SystemClock.uptimeMillis() > start + timeout) {
                 throw new UiObjectNotFoundException("UiObject " + target.toUiSelector().toString() + " not found!");
             }
             SystemClock.sleep(1); // normally 100ms for click
         }
 
-        ObjInfo objInfo = ObjInfo.getObjInfo(targetObj);
-        Rect rect = objInfo.getBounds();
-        int x = (rect.getLeft() + rect.getRight()) / 2;
-        int y = (rect.getTop() + rect.getBottom()) / 2;
-        return this.click(x, y, 0);
+        android.graphics.Rect rect = targetObj.getVisibleBounds();
+        int x = (rect.left + rect.right) / 2;
+        int y = (rect.top + rect.bottom) / 2;
+        touchController.touchDown(x, y);
+        return touchController.touchUp(x, y);
     }
 
     @Override
     public boolean fastClickExists(Selector target, long timeout, long preWait) throws UiObjectNotFoundException {
-        if(preWait>0){
+        if (preWait > 0) {
             SystemClock.sleep(preWait);
         }
 
@@ -83,11 +83,11 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
             targetObj = device.findObject(bySelector);
         }
 
-        ObjInfo objInfo = ObjInfo.getObjInfo(targetObj);
-        Rect rect = objInfo.getBounds();
-        int x = (rect.getLeft() + rect.getRight()) / 2;
-        int y = (rect.getTop() + rect.getBottom()) / 2;
-        return this.click(x, y, 0);
+        android.graphics.Rect rect = targetObj.getVisibleBounds();
+        int x = (rect.left + rect.right) / 2;
+        int y = (rect.top + rect.bottom) / 2;
+        touchController.touchDown(x, y);
+        return touchController.touchUp(x, y);
     }
 
 }
