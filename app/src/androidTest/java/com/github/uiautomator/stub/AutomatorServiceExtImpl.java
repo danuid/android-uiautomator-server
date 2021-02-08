@@ -12,6 +12,7 @@ import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
 import androidx.test.uiautomator.Until;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements AutomatorServiceExt {
@@ -91,8 +92,33 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
         return result;
     }
 
+
+    private boolean fastClickExistsOrGone(boolean exist,
+                                          BySelector clickTarget, BySelector waitTarget,
+                                          long timeout, long preWait) throws UiObjectNotFoundException {
+        if (preWait > 0) {
+            SystemClock.sleep(preWait);
+        }
+
+        long start = SystemClock.uptimeMillis();
+        UiObject2 waitObj = device.findObject(waitTarget);
+        while ((exist && waitObj == null) || (!exist && waitObj != null)) {
+            if (SystemClock.uptimeMillis() > start + timeout) {
+                throw new UiObjectNotFoundException("UiObject " + waitTarget.toString() + " not found!");
+            }
+            SystemClock.sleep(1); // normally 100ms for click
+            waitObj = device.findObject(waitTarget);
+        }
+
+        android.graphics.Rect rect = device.findObject(clickTarget).getVisibleBounds();
+        int x = (rect.left + rect.right) / 2;
+        int y = (rect.top + rect.bottom) / 2;
+        return injectClickEvent(x, y);
+    }
+
     @Override
     public boolean fastClickExists(Selector target, long timeout, long preWait) throws UiObjectNotFoundException {
+        // TODO merge below with above method later
         if (preWait > 0) {
             SystemClock.sleep(preWait);
         }
@@ -113,8 +139,31 @@ public class AutomatorServiceExtImpl extends AutomatorServiceImpl implements Aut
         int x = (rect.left + rect.right) / 2;
         int y = (rect.top + rect.bottom) / 2;
         return injectClickEvent(x, y);
-//        touchController.touchDown(x, y);
-//        return touchController.touchUp(x, y);
+    }
+
+    @Override
+    public boolean fastClickGone(Selector clickTarget, Selector waitTarget, long timeout, long preWait)
+            throws UiObjectNotFoundException {
+        BySelector clickSelector = clickTarget.toBySelector();
+        BySelector waitSelector = waitTarget.toBySelector();
+        return fastClickExistsOrGone(false, clickSelector, waitSelector, timeout, preWait);
+    }
+
+    @Override
+    public boolean fastClickPos(List<Integer> posList) {
+        int len = posList.size(), idx = 0;
+        boolean result = false;
+
+        while (len - idx >= 2) {
+            int x = posList.get(idx);
+            int y = posList.get(idx + 1);
+            result = injectClickEvent(x, y);
+            idx += 2;
+        }
+        if (len - idx != 0) {
+            return false;
+        }
+        return result;
     }
 
 }

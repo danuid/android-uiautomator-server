@@ -2,6 +2,8 @@ package com.github.uiautomator.stub;
 
 import androidx.test.uiautomator.UiObjectNotFoundException;
 
+import java.util.List;
+
 public interface AutomatorServiceExt extends AutomatorService {
     /**
      * 在目标为enabled状态的时候马上点击
@@ -22,8 +24,28 @@ public interface AutomatorServiceExt extends AutomatorService {
      * @param obj     点击目标
      * @param timeout 查找元素超时时长,in milliseconds
      * @param preWait 查找元素前等待milliseconds时长
-     * @return
-     * @throws UiObjectNotFoundException
+     * @return 是否有进行点击
+     * @throws UiObjectNotFoundException 元素未找到
      */
     boolean fastClickExists(Selector obj, long timeout, long preWait) throws UiObjectNotFoundException;
+
+    /**
+     * 等待元素消失后点击
+     *
+     * @param clickTarget 点击目标
+     * @param waitTarget  等待目标
+     * @param timeout     查找元素超时时长,in milliseconds
+     * @param preWait     查找元素前等待milliseconds时长
+     * @return 是否有进行点击
+     * @throws UiObjectNotFoundException 元素未找到
+     */
+    boolean fastClickGone(Selector clickTarget, Selector waitTarget, long timeout, long preWait) throws UiObjectNotFoundException;
+
+    /**
+     * 联系点击坐标点
+     *
+     * @param posList 坐标列表，格式为：x1,y1,x2,y2...
+     * @return 最后一次是否点击成功
+     */
+    boolean fastClickPos(List<Integer> posList);
 }
