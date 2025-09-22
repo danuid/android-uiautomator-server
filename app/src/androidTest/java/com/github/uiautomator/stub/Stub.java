@@ -93,7 +93,8 @@ public class Stub {
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         device.wakeUp();
 
-        JsonRpcServer jrs = new JsonRpcServer(new ObjectMapper(), new AutomatorServiceImpl(), AutomatorService.class);
+        // Daniel updated
+        JsonRpcServer jrs = new JsonRpcServer(new ObjectMapper(), new AutomatorServiceExtImpl(), AutomatorServiceExt.class);
         jrs.setShouldLogInvocationErrors(true);
         jrs.setErrorResolver(new ErrorResolver() {
             @Override
