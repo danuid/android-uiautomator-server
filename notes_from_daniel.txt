@@ -1,0 +1,30 @@
+In 2025-Sept-22, I tried to update the apk to latest code from Github https://github.com/openatx/android-uiautomator-server.
+But the server code in Stub.java keeps turning unresponsive after a few requests.
+Not sure if it is due to bug or the physical Anrdoid device (OPPO Reno9 Pro+) I am using.
+
+I tried to revert to year 2021's version, when I was first developing this tool for "HK stock IPO quota grabbing" progject.
+But the gradle build requires outdated plugins from jcenter(), which is no longer available.
+And updating the gradle and plugin version still results in the server being unresponsive after a few requests.
+
+
+Commands used to test the server:
+
+# Start the UI Automator server
+adb shell "am instrument -w -r -e debug false -e class com.github.uiautomator.stub.Stub com.github.uiautomator.test/androidx.test.runner.AndroidJUnitRunner"
+
+# Forward device port to host
+adb forward tcp:9008 tcp:9008
+
+# Test from host machine
+curl -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"ping","id":1}' http://localhost:9008/jsonrpc/0
+
+# Test device info method
+adb shell "curl -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"deviceInfo\",\"id\":1}' http://localhost:9008/jsonrpc/0"
+
+# Test with timeout and verbose output for debugging
+adb shell "curl -v --connect-timeout 10 -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":1}' http://localhost:9008/jsonrpc/0"
+
+
+---------------------------------------
+
+At the end, I decided to abandon this code, and just go for the latest version of uiautomator2 for my "android-mass-auto" project.
